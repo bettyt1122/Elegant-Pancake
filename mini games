@@ -1,0 +1,207 @@
+[game.html](https://github.com/user-attachments/files/28299493/game.html)
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>圈圈叉叉小遊戲</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Microsoft JhengHei", Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #dff3ff, #f9e7ff);
+    }
+
+    .game-box {
+      width: 360px;
+      padding: 28px;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      color: #333;
+      font-size: 30px;
+    }
+
+    .status {
+      margin: 12px 0 20px;
+      font-size: 18px;
+      color: #555;
+      font-weight: bold;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      width: 95px;
+      height: 95px;
+      border: none;
+      border-radius: 18px;
+      background: #f2f6ff;
+      font-size: 46px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #333;
+    }
+
+    .cell:hover {
+      background: #e1ecff;
+      transform: scale(1.04);
+    }
+
+    .cell.o {
+      color: #4a90e2;
+    }
+
+    .cell.x {
+      color: #ff6b81;
+    }
+
+    .cell:disabled {
+      cursor: not-allowed;
+      opacity: 0.9;
+    }
+
+    .restart-btn {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 999px;
+      background: #6c63ff;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .restart-btn:hover {
+      background: #554ce0;
+      transform: translateY(-2px);
+    }
+
+    .note {
+      margin-top: 14px;
+      color: #888;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <h1>圈圈叉叉</h1>
+    <div class="status" id="status">目前輪到：O</div>
+
+    <div class="board">
+      <button class="cell" data-index="0"></button>
+      <button class="cell" data-index="1"></button>
+      <button class="cell" data-index="2"></button>
+      <button class="cell" data-index="3"></button>
+      <button class="cell" data-index="4"></button>
+      <button class="cell" data-index="5"></button>
+      <button class="cell" data-index="6"></button>
+      <button class="cell" data-index="7"></button>
+      <button class="cell" data-index="8"></button>
+    </div>
+
+    <button class="restart-btn" onclick="restartGame()">重新開始</button>
+    <div class="note">兩個人輪流玩，先連成一線的人獲勝！</div>
+  </div>
+
+  <script>
+    const cells = document.querySelectorAll(".cell");
+    const statusText = document.getElementById("status");
+
+    let currentPlayer = "O";
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let gameOver = false;
+
+    const winPatterns = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+
+    cells.forEach(cell => {
+      cell.addEventListener("click", () => {
+        const index = cell.dataset.index;
+
+        if (board[index] !== "" || gameOver) {
+          return;
+        }
+
+        board[index] = currentPlayer;
+        cell.textContent = currentPlayer;
+        cell.classList.add(currentPlayer.toLowerCase());
+        cell.disabled = true;
+
+        checkWinner();
+
+        if (!gameOver) {
+          currentPlayer = currentPlayer === "O" ? "X" : "O";
+          statusText.textContent = `目前輪到：${currentPlayer}`;
+        }
+      });
+    });
+
+    function checkWinner() {
+      for (let pattern of winPatterns) {
+        const [a, b, c] = pattern;
+
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          statusText.textContent = `🎉 ${currentPlayer} 獲勝！`;
+          gameOver = true;
+          disableAllCells();
+          return;
+        }
+      }
+
+      if (!board.includes("")) {
+        statusText.textContent = "平手！再來一局吧～";
+        gameOver = true;
+      }
+    }
+
+    function disableAllCells() {
+      cells.forEach(cell => {
+        cell.disabled = true;
+      });
+    }
+
+    function restartGame() {
+      currentPlayer = "O";
+      board = ["", "", "", "", "", "", "", "", ""];
+      gameOver = false;
+      statusText.textContent = "目前輪到：O";
+
+      cells.forEach(cell => {
+        cell.textContent = "";
+        cell.disabled = false;
+        cell.classList.remove("o", "x");
+      });
+    }
+  </script>
+</body>
+</html>
